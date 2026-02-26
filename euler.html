@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euler's Method - Numerical Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #9B59B6 0%, #8e44ad 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #9B59B6;
+        }
+
+        .back-btn {
+            background: #9B59B6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #8e44ad;
+            transform: scale(1.05);
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 1.8em;
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, #f4ecf7, #e8daef);
+            border-left: 5px solid #9B59B6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .formula-box h3 {
+            color: #7d3c98;
+            margin-bottom: 10px;
+        }
+
+        .formula-box code {
+            font-size: 1.1em;
+            color: #9B59B6;
+            font-weight: bold;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #2C3E50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #9B59B6;
+            box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #9B59B6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 89, 182, 0.5);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #9B59B6;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            display: none;
+            overflow-x: auto;
+        }
+
+        .result-box h3 {
+            color: #7d3c98;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #9B59B6;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e8daef;
+        }
+
+        .final-result {
+            background: linear-gradient(145deg, #d5f5e3, #abebc6);
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #145a32;
+        }
+
+        .error-box {
+            background: linear-gradient(145deg, #fadbd8, #f5b7b1);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            color: #c0392b;
+            display: none;
+        }
+
+        .hint {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            font-size: 0.95em;
+        }
+
+        .footer-nav {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="home.html" class="back-btn">🏠 Home</a>
+            <h1>📈 Euler's Method</h1>
+        </div>
+
+        <div class="formula-box">
+            <h3>📝 Formula:</h3>
+            <code>y<sub>n+1</sub> = y<sub>n</sub> + h × f(x<sub>n</sub>, y<sub>n</sub>)</code>
+            <p style="margin-top: 10px; color: #666;">Solves: dy/dx = f(x, y)</p>
+        </div>
+
+        <div class="input-group">
+            <label>Function f(x, y):</label>
+            <input type="text" id="function" placeholder="e.g., x + y or x*y" value="x + y">
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Initial x (x<sub>0</sub>):</label>
+                <input type="number" id="x0" value="0" step="any">
+            </div>
+            <div class="input-group">
+                <label>Initial y (y<sub>0</sub>):</label>
+                <input type="number" id="y0" value="1" step="any">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Step Size (h):</label>
+                <input type="number" id="stepSize" value="0.1" step="any">
+            </div>
+            <div class="input-group">
+                <label>Target x:</label>
+                <input type="number" id="targetX" value="2" step="any">
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculateEuler()">✨ Solve ODE</button>
+
+        <div class="hint">
+            💡 <strong>Supported:</strong> Use 'x' and 'y' variables.<br>
+            Examples: <code>x + y</code>, <code>x - y</code>, <code>x * y</code>, <code>Math.sin(x) + y</code>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+
+        <div class="result-box" id="resultBox">
+            <h3>📊 Solution Table:</h3>
+            <table id="solutionTable">
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>x<sub>n</sub></th>
+                        <th>y<sub>n</sub></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div class="final-result" id="finalResult"></div>
+        </div>
+
+        <div class="footer-nav">
+            <a href="simpson.html" class="back-btn">← Simpson's Rule</a>
+            <a href="gauss.html" class="back-btn" style="background: #FF6B6B;">Gauss Elimination →</a>
+        </div>
+    </div>
+
+    <script>
+        function calculateEuler() {
+            const errorBox = document.getElementById('errorBox');
+            const resultBox = document.getElementById('resultBox');
+            const tableBody = document.getElementById('tableBody');
+            const finalResult = document.getElementById('finalResult');
+            
+            errorBox.style.display = 'none';
+            resultBox.style.display = 'none';
+            tableBody.innerHTML = '';
+
+            try {
+                // Get input values
+                const funcStr = document.getElementById('function').value;
+                const x0 = parseFloat(document.getElementById('x0').value);
+                const y0 = parseFloat(document.getElementById('y0').value);
+                const h = parseFloat(document.getElementById('stepSize').value);
+                const targetX = parseFloat(document.getElementById('targetX').value);
+
+                // Validate inputs
+                if (isNaN(x0) || isNaN(y0) || isNaN(h) || isNaN(targetX)) {
+                    throw new Error("Please enter valid numeric values");
+                }
+                if (h <= 0) {
+                    throw new Error("Step size (h) must be positive");
+                }
+
+                // Define function f(x, y)
+                function f(x, y) {
+                    try {
+                        // Create safe evaluation context
+                        const allowedMath = {
+                            sin: Math.sin,
+                            cos: Math.cos,
+                            tan: Math.tan,
+                            log: Math.log,
+                            exp: Math.exp,
+                            sqrt: Math.sqrt,
+                            abs: Math.abs,
+                            pow: Math.pow,
+                            PI: Math.PI
+                        };
+                        
+                        let expr = funcStr
+                            .replace(/sin\$/g, 'Math.sin(')
+                            .replace(/cos\$/g, 'Math.cos(')
+                            .replace(/tan\$/g, 'Math.tan(')
+                            .replace(/log\$/g, 'Math.log(')
+                            .replace(/exp\$/g, 'Math.exp(')
+                            .replace(/sqrt\$/g, 'Math.sqrt(')
+                            .replace(/abs\$/g, 'Math.abs(')
+                            .replace(/PI/g, 'Math.PI')
+                            .replace(/\^/g, '**');
+                        
+                        // Evaluate using Function constructor for safety
+                        const func = new Function('x', 'y', `return ${expr}`);
+                        return func(x, y);
+                    } catch (e) {
+                        throw new Error("Invalid function. Use 'x' and 'y' variables.");
+                    }
+                }
+
+                // Euler's Method Calculation
+                let x = x0;
+                let y = y0;
+                let step = 0;
+                let maxSteps = 10000; // Prevent infinite loop
+                
+                // Add initial point
+                let row = `<tr>
+                    <td>${step}</td>
+                    <td>${x.toFixed(6)}</td>
+                    <td>${y.toFixed(6)}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+
+                // Iterate
+                while (x < targetX && step < maxSteps) {
+                    // Calculate next point
+                    let slope = f(x, y);
+                    y = y + h * slope;
+                    x = x + h;
+                    step++;
+
+                    // Add to table
+                    row = `<tr>
+                        <td>${step}</td>
+                        <td>${x.toFixed(6)}</td>
+                        <td>${y.toFixed(6)}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                }
+
+                // Show results
+                finalResult.innerHTML = `At x = ${targetX}: y ≈ <span style="color: #27ae60;">${y.toFixed(6)}</span>`;
+                resultBox.style.display = 'block';
+
+            } catch (error) {
+                errorBox.textContent = '❌ Error: ' + error.message;
+                errorBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
